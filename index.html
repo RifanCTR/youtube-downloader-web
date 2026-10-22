@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Stream & Download</title>
+    <title>Media Downloader</title>
     <style>
         :root {
             --bg-color: #090d16;
@@ -34,90 +34,53 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 32px;
-            max-width: 520px;
+            max-width: 480px;
             width: 100%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .header {
-            margin-bottom: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            text-align: center;
         }
         .title {
             font-size: 1.1rem;
             font-weight: 600;
             color: var(--text-main);
+            margin-bottom: 24px;
             line-height: 1.5;
             word-break: break-word;
         }
-        .media-box {
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            aspect-ratio: 16 / 9;
-        }
-        video, audio {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            outline: none;
-        }
         .action-btn {
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: block;
             width: 100%;
             background-color: var(--accent-color);
             color: #ffffff;
             text-decoration: none;
-            padding: 12px 20px;
+            padding: 14px 20px;
             border-radius: 8px;
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: background-color 0.2s ease;
-            border: none;
-            cursor: pointer;
         }
         .action-btn:hover {
             background-color: var(--accent-hover);
         }
         .status-text {
-            text-align: center;
             color: var(--text-muted);
             font-size: 0.85rem;
-            margin-top: 16px;
+            margin-top: 20px;
         }
         .error-message {
             color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            text-align: center;
+            font-size: 0.95rem;
         }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
-    <div id="content-container">
-        <div class="header">
-            <h1 id="media-title" class="title">memuat media...</h1>
-        </div>
-        
-        <div class="media-box" id="player-wrapper">
-            <!-- Media player -->
-        </div>
-
-        <a id="download-trigger" href="#" class="action-btn" style="display: none;" download>unduh file</a>
+    <div id="content">
+        <h1 id="media-title" class="title">menyiapkan file...</h1>
+        <a id="download-btn" href="#" class="action-btn" style="display: none;">unduh file mp4 sekarang</a>
     </div>
-    <div id="fallback-container"></div>
-    
+    <div id="error-box"></div>
     <div class="status-text">secure media gateway</div>
 </div>
 
@@ -125,29 +88,21 @@
     const params = new URLSearchParams(window.location.search);
     const sourceUrl = params.get('src');
     const rawTitle = params.get('title');
-    const mediaType = params.get('type') || 'video';
 
     const titleEl = document.getElementById('media-title');
-    const playerWrapper = document.getElementById('player-wrapper');
-    const downloadBtn = document.getElementById('download-trigger');
-    const contentContainer = document.getElementById('content-container');
-    const fallbackContainer = document.getElementById('fallback-container');
+    const downloadBtn = document.getElementById('download-btn');
+    const contentDiv = document.getElementById('content');
+    const errorBox = document.getElementById('error-box');
 
     if (sourceUrl && rawTitle) {
         const decodedTitle = decodeURIComponent(rawTitle);
         titleEl.textContent = decodedTitle;
         
         downloadBtn.href = sourceUrl;
-        downloadBtn.style.display = 'flex';
-
-        if (mediaType === 'audio') {
-            playerWrapper.innerHTML = `<audio controls autoplay src="${sourceUrl}"></audio>`;
-        } else {
-            playerWrapper.innerHTML = `<video controls autoplay playsinline src="${sourceUrl}"></video>`;
-        }
+        downloadBtn.style.display = 'block';
     } else {
-        contentContainer.style.display = 'none';
-        fallbackContainer.innerHTML = `<div class="error-message">tautan tidak valid atau parameter tidak lengkap.</div>`;
+        contentDiv.style.display = 'none';
+        errorBox.innerHTML = `<div class="error-message">tautan tidak valid atau parameter kedaluwarsa.</div>`;
     }
 </script>
 
