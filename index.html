@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Downloader - Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0d1117;
+            color: #c9d1d9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: #58a6ff;
+            word-break: break-word;
+        }
+        .media-container {
+            margin: 20px 0;
+            background: #0d1117;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        video, audio {
+            width: 100%;
+            outline: none;
+        }
+        .btn-download {
+            display: inline-block;
+            width: 100%;
+            background-color: #238636;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 0;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        .btn-download:hover {
+            background-color: #2ea043;
+        }
+        .footer {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: #8b949e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 id="media-title">memuat media...</h2>
+    
+    <div class="media-container" id="player-box">
+        <!-- Player video/audio dimasukkan via js -->
+    </div>
+
+    <a id="download-btn" href="#" class="btn-download" download>📥 Simpan / Unduh Sekarang</a>
+
+    <div class="footer">
+        dioptimalkan untuk browser hp & desktop
+    </div>
+</div>
+
+<script>
+    // mengambil parameter dari url (contoh: ?src=...&title=...&type=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const src = urlParams.get('src');
+    const title = urlParams.get('title') || 'Media Player';
+    const type = urlParams.get('type') || 'video';
+
+    document.getElementById('media-title').innerText = title;
+
+    const playerBox = document.getElementById('player-box');
+    const downloadBtn = document.getElementById('download-btn');
+
+    if (src) {
+        downloadBtn.href = src;
+        if (type === 'audio') {
+            playerBox.innerHTML = `<audio controls autoplay src="${src}"></audio>`;
+        } else {
+            playerBox.innerHTML = `<video controls autoplay src="${src}"></video>`;
+        }
+    } else {
+        document.getElementById('media-title').innerText = 'Tautan tidak valid atau telah kedaluwarsa.';
+        downloadBtn.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
