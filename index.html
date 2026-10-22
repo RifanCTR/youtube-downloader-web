@@ -3,109 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Media Downloader - Player</title>
+    <title>Media Stream & Download</title>
     <style>
+        :root {
+            --bg-color: #090d16;
+            --card-bg: #111827;
+            --border-color: #1f2937;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background-color: #0d1117;
-            color: #c9d1d9;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 16px;
         }
-        .card {
-            background: #161b22;
-            border: 1px solid #30363d;
+        .wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 24px;
-            max-width: 480px;
+            padding: 32px;
+            max-width: 520px;
             width: 100%;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
-        h2 {
-            font-size: 1.2rem;
-            margin-bottom: 12px;
-            color: #58a6ff;
+        .header {
+            margin-bottom: 24px;
+        }
+        .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            line-height: 1.5;
             word-break: break-word;
         }
-        .media-container {
-            margin: 20px 0;
-            background: #0d1117;
+        .media-box {
+            background: #000;
             border-radius: 8px;
             overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            aspect-ratio: 16 / 9;
         }
         video, audio {
             width: 100%;
+            height: 100%;
+            object-fit: contain;
             outline: none;
         }
-        .btn-download {
-            display: inline-block;
+        .action-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
-            background-color: #238636;
+            background-color: var(--accent-color);
             color: #ffffff;
             text-decoration: none;
-            padding: 12px 0;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: background 0.2s;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
         }
-        .btn-download:hover {
-            background-color: #2ea043;
+        .action-btn:hover {
+            background-color: var(--accent-hover);
         }
-        .footer {
+        .status-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
             margin-top: 16px;
-            font-size: 0.8rem;
-            color: #8b949e;
+        }
+        .error-message {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 id="media-title">memuat media...</h2>
+<div class="wrapper">
+    <div id="content-container">
+        <div class="header">
+            <h1 id="media-title" class="title">Memuat media...</h1>
+        </div>
+        
+        <div class="media-box" id="player-wrapper">
+            <!-- Media player -->
+        </div>
+
+        <a id="download-trigger" href="#" class="action-btn" style="display: none;" download>Unduh File</a>
+    </div>
+    <div id="fallback-container"></div>
     
-    <div class="media-container" id="player-box">
-        <!-- Player video/audio dimasukkan via js -->
-    </div>
-
-    <a id="download-btn" href="#" class="btn-download" download>📥 Simpan / Unduh Sekarang</a>
-
-    <div class="footer">
-        dioptimalkan untuk browser hp & desktop
-    </div>
+    <div class="status-text">Secure Media Gateway</div>
 </div>
 
 <script>
-    // mengambil parameter dari url (contoh: ?src=...&title=...&type=...)
-    const urlParams = new URLSearchParams(window.location.search);
-    const src = urlParams.get('src');
-    const title = urlParams.get('title') || 'Media Player';
-    const type = urlParams.get('type') || 'video';
+    const params = new URLSearchParams(window.location.search);
+    const sourceUrl = params.get('src');
+    const rawTitle = params.get('title');
+    const mediaType = params.get('type') || 'video';
 
-    document.getElementById('media-title').innerText = title;
+    const titleEl = document.getElementById('media-title');
+    const playerWrapper = document.getElementById('player-wrapper');
+    const downloadBtn = document.getElementById('download-trigger');
+    const contentContainer = document.getElementById('content-container');
+    const fallbackContainer = document.getElementById('fallback-container');
 
-    const playerBox = document.getElementById('player-box');
-    const downloadBtn = document.getElementById('download-btn');
+    if (sourceUrl && rawTitle) {
+        const decodedTitle = decodeURIComponent(rawTitle);
+        titleEl.textContent = decodedTitle;
+        
+        downloadBtn.href = sourceUrl;
+        downloadBtn.style.display = 'flex';
 
-    if (src) {
-        downloadBtn.href = src;
-        if (type === 'audio') {
-            playerBox.innerHTML = `<audio controls autoplay src="${src}"></audio>`;
+        if (mediaType === 'audio') {
+            playerWrapper.innerHTML = `<audio controls autoplay src="${sourceUrl}"></audio>`;
         } else {
-            playerBox.innerHTML = `<video controls autoplay src="${src}"></video>`;
+            playerWrapper.innerHTML = `<video controls autoplay playsinline src="${sourceUrl}"></video>`;
         }
     } else {
-        document.getElementById('media-title').innerText = 'Tautan tidak valid atau telah kedaluwarsa.';
-        downloadBtn.style.display = 'none';
+        contentContainer.style.display = 'none';
+        fallbackContainer.innerHTML = `<div class="error-message">Tautan tidak valid atau parameter tidak lengkap.</div>`;
     }
 </script>
 
